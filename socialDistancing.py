@@ -16,6 +16,7 @@ SCREEN_TITLE = "Social Distancing the Game"
 
 # Choose the staring population size
 POPULATION = 20
+POPULATION_SPEED = 10
 
 class MyGame(arcade.Window):
     """
@@ -41,25 +42,22 @@ class MyGame(arcade.Window):
         # Create your sprites and sprite lists here
         
         # Setting the spawn coordinates for the population and their initial velocities
-        for x in range(0,POPULATION):
+        for x in range(0,POPULATION):     
+            # Setting the initial velocity of the population
+            delta_x = random.randint(-POPULATION_SPEED,POPULATION_SPEED)
+            if delta_x >= 0:
+                delta_y = random.randrange(-1,2,2)*( POPULATION_SPEED - delta_x)
+            else:
+                delta_y = random.randrange(-1,2,2)*( POPULATION_SPEED + delta_x)
+            
             spawn_coord_x = random.randint(10, SCREEN_WIDTH - 10)
             spawn_coord_y = random.randint(10, SCREEN_HEIGHT - 10)
-            
-            delta_x = random.randint(-10,10)
-            if delta_x >= 0:
-                delta_y = random.randrange(-1,1,2)*( 10 - delta_x)
-            else:
-                delta_y = random.randrange(-1,1,2)*( 10 + delta_x)
-            
-            print(delta_x)
-            print(delta_y)
-            
             # Making sure the population doesnt spawn within the players circle
             while ((SCREEN_WIDTH/2) -5<spawn_coord_x< (SCREEN_WIDTH/2) +5) and ((SCREEN_HEIGHT/2) -5<spawn_coord_y< (SCREEN_HEIGHT/2) +5):
                 spawn_coord_x = random.randint(10, SCREEN_WIDTH - 10)
                 spawn_coord_y = random.randint(10, SCREEN_HEIGHT - 10)
 
-            self.people.append([spawn_coord_x, spawn_coord_y])
+            self.people.append([spawn_coord_x, spawn_coord_y, delta_x, delta_y])
         pass
 
     def on_draw(self):
@@ -83,7 +81,19 @@ class MyGame(arcade.Window):
         Normally, you'll call update() on the sprite lists that
         need it.
         """
-        
+
+        for person in self.people:
+            coord_x = person[0]
+            coord_y = person[1]
+            delta_x = person[2]
+            delta_y = person[3] 
+
+            # Update the x and y coordinates based on the velocity
+            coord_x += delta_x 
+            coord_y += delta_y
+
+            person[0] = coord_x
+            person[1] = coord_y
         pass
         
 
