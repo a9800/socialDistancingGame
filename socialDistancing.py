@@ -19,6 +19,7 @@ POPULATION = 20
 POPULATION_SPEED = 7
 BOUNCINESS = 1
 CIRCLE_RADIUS = 8
+PLAYER_RADIUS = 30
 
 class MyGame(arcade.Window):
     """
@@ -28,7 +29,6 @@ class MyGame(arcade.Window):
     If you do need a method, delete the 'pass' and replace it
     with your own code. Don't leave 'pass' in this program.
     """
-
 
     def __init__(self, width, height, title):
         super().__init__(width, height, title)
@@ -57,12 +57,13 @@ class MyGame(arcade.Window):
             spawn_coord_x = random.randint(10, SCREEN_WIDTH - 10)
             spawn_coord_y = random.randint(10, SCREEN_HEIGHT - 10)
             # Making sure the population doesnt spawn within the players circle
-            while ((SCREEN_WIDTH/2) -5<spawn_coord_x< (SCREEN_WIDTH/2) +5) and ((SCREEN_HEIGHT/2) -5<spawn_coord_y< (SCREEN_HEIGHT/2) +5):
+            while ((SCREEN_WIDTH/2) -5 < spawn_coord_x < (SCREEN_WIDTH/2) +5) and ((SCREEN_HEIGHT/2) -5<spawn_coord_y< (SCREEN_HEIGHT/2) +5):
                 spawn_coord_x = random.randint(10, SCREEN_WIDTH - 10)
                 spawn_coord_y = random.randint(10, SCREEN_HEIGHT - 10)
 
-            self.people.append([spawn_coord_x, spawn_coord_y, delta_x, delta_y, change_x, change_y])
+            self.people.append([spawn_coord_x, spawn_coord_y, delta_x, delta_y, change_x, change_y, 0])
         pass
+    
 
     def on_draw(self):
         """
@@ -74,10 +75,13 @@ class MyGame(arcade.Window):
 
         # Call draw() on all your sprite lists below
         arcade.draw_circle_filled(self.player[0]/2, self.player[1]/2, 8, arcade.color.GREEN)
-        arcade.draw_circle_outline(self.player[0]/2, self.player[1]/2, 30, arcade.color.GREEN, 2)
+        arcade.draw_circle_outline(self.player[0]/2, self.player[1]/2, PLAYER_RADIUS, arcade.color.GREEN, 2)
         
         for person in self.people:
-            arcade.draw_circle_filled(person[0], person[1], CIRCLE_RADIUS, arcade.color.BLACK)
+            if person[6]==1:
+                arcade.draw_circle_filled(person[0], person[1], CIRCLE_RADIUS, arcade.color.GREEN)
+            else:
+                arcade.draw_circle_filled(person[0], person[1], CIRCLE_RADIUS, arcade.color.BLACK)
 
     def on_update(self, delta_time):
         """
@@ -108,20 +112,25 @@ class MyGame(arcade.Window):
             # Change Velocity of person by chance
             chance = random.randint(0,100)
             if chance <= 10:
-                if person[2] == POPULATION_SPEED:
+                if person[2] ==  POPULATION_SPEED:
                     person[4] = -1
 
                 if person[2] == -POPULATION_SPEED:
-                    person[4] = 1
+                    person[4] =  1
 
-                if person[3] == POPULATION_SPEED:
+                if person[3] ==  POPULATION_SPEED:
                     person[5] = -1
 
                 if person[3] == -POPULATION_SPEED:
-                    person[5] = 1
+                    person[5] =  1
 
                 person[2] += person[4]
                 person[3] += person[5]
+
+            if (self.player[0]/2 - PLAYER_RADIUS < person[0] < self.player[0]/2 + PLAYER_RADIUS) and (self.player[1]/2 - PLAYER_RADIUS < person[1] < self.player[1]/2 + PLAYER_RADIUS):
+                person[6] = 1
+
+
         pass
         
 
@@ -132,6 +141,7 @@ class MyGame(arcade.Window):
         For a full list of keys, see:
         http://arcade.academy/arcade.key.html
         """
+
         pass
 
     def on_key_release(self, key, key_modifiers):
@@ -144,6 +154,8 @@ class MyGame(arcade.Window):
         """
         Called whenever the mouse moves.
         """
+        self.player[0] = x*2
+        self.player[1] = y*2
         pass
 
     def on_mouse_press(self, x, y, button, key_modifiers):
