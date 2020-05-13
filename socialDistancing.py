@@ -20,8 +20,10 @@ POPULATION = 20
 POPULATION_SPEED = 7
 BOUNCINESS = 1
 CIRCLE_RADIUS = 8
-PLAYER_RADIUS = 30
+PEOPLE_RADIUS = 30
 SPRITE_SCALING_PLAYER = 0.7
+SPRITE_SCALING_POWERUP = 0.5
+POWERUP_DROP_RATE = 0.5
 
 class MyGame(arcade.Window):
     """
@@ -37,8 +39,9 @@ class MyGame(arcade.Window):
 
         arcade.set_background_color(arcade.color.AIR_FORCE_BLUE)
         
-        self.player=[SCREEN_WIDTH,SCREEN_HEIGHT]
+        self.player=[SCREEN_WIDTH/2,SCREEN_HEIGHT/2]
         self.people=[]
+        self.people_speed = POPULATION_SPEED
         # If you have sprite lists, you should create them here,
         # and set them to None
 
@@ -46,8 +49,13 @@ class MyGame(arcade.Window):
         # Create your sprites and sprite lists here
         # Don't show the mouse cursor
         self.set_mouse_visible(False)
-        
+
         self.player_list = arcade.SpriteList()
+        self.powerup_list = arcade.SpriteList()
+        self.powerup_draw = arcade.SpriteList()
+
+        self.slowdown_sprite = arcade.Sprite(os.getcwd()+"/cold-sprite.png", SPRITE_SCALING_POWERUP)
+        self.powerup_list.append(self.slowdown_sprite)
 
         self.player_sprite = arcade.Sprite(os.getcwd()+"/corona-sprite.png", SPRITE_SCALING_PLAYER)
         self.player_list.append(self.player_sprite)
@@ -57,11 +65,11 @@ class MyGame(arcade.Window):
             change_x =  1
             change_y = -1 
             # Setting the initial velocity of the population
-            delta_x = random.randint(-POPULATION_SPEED,POPULATION_SPEED)
+            delta_x = random.randint(-self.people_speed,self.people_speed)
             if delta_x >= 0:
-                delta_y = random.randrange(-1,2,2)*( POPULATION_SPEED - delta_x)
+                delta_y = random.randrange(-1,2,2)*( self.people_speed - delta_x)
             else:
-                delta_y = random.randrange(-1,2,2)*( POPULATION_SPEED + delta_x)
+                delta_y = random.randrange(-1,2,2)*( self.people_speed + delta_x)
             
             spawn_coord_x = random.randint(10, SCREEN_WIDTH - 10)
             spawn_coord_y = random.randint(10, SCREEN_HEIGHT - 10)
@@ -83,10 +91,11 @@ class MyGame(arcade.Window):
         arcade.start_render()
 
         # Call draw() on all your sprite lists below
-        arcade.draw_circle_outline(self.player[0], self.player[1], PLAYER_RADIUS, arcade.color.GREEN, 2)
+        arcade.draw_circle_outline(self.player[0], self.player[1], PEOPLE_RADIUS, arcade.color.GREEN, 2)
         self.player_sprite.center_x = self.player[0]
         self.player_sprite.center_y = self.player[1]
         self.player_list.draw()
+        self.powerup_draw.draw()
         
         for person in self.people:
             if person[6]==1:
@@ -123,25 +132,46 @@ class MyGame(arcade.Window):
             # Change Velocity of person by chance
             chance = random.randint(0,100)
             if chance <= 10:
-                if person[2] ==  POPULATION_SPEED:
+                if person[2] ==  self.people_speed:
                     person[4] = -1
 
-                if person[2] == -POPULATION_SPEED:
+                if person[2] == -self.people_speed:
                     person[4] =  1
 
-                if person[3] ==  POPULATION_SPEED:
+                if person[3] ==  self.people_speed:
                     person[5] = -1
 
-                if person[3] == -POPULATION_SPEED:
+                if person[3] == -self.people_speed:
                     person[5] =  1
 
                 person[2] += person[4]
                 person[3] += person[5]
 
             # If a person is within radius of the player the person gets infected
-            if (self.player[0] - PLAYER_RADIUS < person[0] < self.player[0] + PLAYER_RADIUS) and (self.player[1] - PLAYER_RADIUS < person[1] < self.player[1] + PLAYER_RADIUS):
+            if (self.player[0] - PEOPLE_RADIUS < person[0] < self.player[0] + PEOPLE_RADIUS) and (self.player[1] - PEOPLE_RADIUS < person[1] < self.player[1] + PEOPLE_RADIUS):
                 person[6] = 1
+        if len(self.powerup_list) != 0 :
+            drop = random.randint(0,100)
+            if drop <= POWERUP_DROP_RATE:
+                powerup = random.randint(0,len(self.powerup_list) - 1)
+                self.powerup_list[powerup].center_x = random.randint(10,SCREEN_WIDTH  -10)
+                self.powerup_list[powerup].center_y = random.randint(10,SCREEN_HEIGHT -10)
+                self.powerup_draw.append(self.powerup_list.pop(powerup))
 
+        powerup_obtained = arcade.check_for_collision_with_list(self.player_sprite, self.powerup_draw)
+        if len(powerup_obtained) > 0 :
+            p = powerup_obtained[0]
+            if p == self.slowdown_sprite:
+                if self.people_speed < 2:
+                    self.people_speed -= 2
+                    for person in range(0,POPULATION):
+                        person[2] = person[2]/4
+                        person[3] = person[3]/4
+
+            
+            self.powerup_list.append(self.powerup_draw.pop(0))
+
+                
         pass
         
 
