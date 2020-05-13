@@ -9,6 +9,7 @@ python -m arcade.examples.starting_template
 """
 import arcade
 import random
+import os
 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
@@ -20,6 +21,7 @@ POPULATION_SPEED = 7
 BOUNCINESS = 1
 CIRCLE_RADIUS = 8
 PLAYER_RADIUS = 30
+SPRITE_SCALING_PLAYER = 0.7
 
 class MyGame(arcade.Window):
     """
@@ -42,10 +44,17 @@ class MyGame(arcade.Window):
 
     def setup(self):
         # Create your sprites and sprite lists here
+        # Don't show the mouse cursor
+        self.set_mouse_visible(False)
         
+        self.player_list = arcade.SpriteList()
+
+        self.player_sprite = arcade.Sprite(os.getcwd()+"/corona-sprite.png", SPRITE_SCALING_PLAYER)
+        self.player_list.append(self.player_sprite)
+
         # Setting the spawn coordinates for the population and their initial velocities
         for x in range(0,POPULATION):    
-            change_x = 1
+            change_x =  1
             change_y = -1 
             # Setting the initial velocity of the population
             delta_x = random.randint(-POPULATION_SPEED,POPULATION_SPEED)
@@ -74,8 +83,10 @@ class MyGame(arcade.Window):
         arcade.start_render()
 
         # Call draw() on all your sprite lists below
-        arcade.draw_circle_filled(self.player[0]/2, self.player[1]/2, 8, arcade.color.GREEN)
-        arcade.draw_circle_outline(self.player[0]/2, self.player[1]/2, PLAYER_RADIUS, arcade.color.GREEN, 2)
+        arcade.draw_circle_outline(self.player[0], self.player[1], PLAYER_RADIUS, arcade.color.GREEN, 2)
+        self.player_sprite.center_x = self.player[0]
+        self.player_sprite.center_y = self.player[1]
+        self.player_list.draw()
         
         for person in self.people:
             if person[6]==1:
@@ -127,9 +138,9 @@ class MyGame(arcade.Window):
                 person[2] += person[4]
                 person[3] += person[5]
 
-            if (self.player[0]/2 - PLAYER_RADIUS < person[0] < self.player[0]/2 + PLAYER_RADIUS) and (self.player[1]/2 - PLAYER_RADIUS < person[1] < self.player[1]/2 + PLAYER_RADIUS):
+            # If a person is within radius of the player the person gets infected
+            if (self.player[0] - PLAYER_RADIUS < person[0] < self.player[0] + PLAYER_RADIUS) and (self.player[1] - PLAYER_RADIUS < person[1] < self.player[1] + PLAYER_RADIUS):
                 person[6] = 1
-
 
         pass
         
@@ -154,8 +165,10 @@ class MyGame(arcade.Window):
         """
         Called whenever the mouse moves.
         """
-        self.player[0] = x*2
-        self.player[1] = y*2
+        # I dont know why we have to multiply but we do
+        self.player[0] = x
+        self.player[1] = y
+        
         pass
 
     def on_mouse_press(self, x, y, button, key_modifiers):
