@@ -64,6 +64,7 @@ class MyGame(arcade.Window):
         for x in range(0,POPULATION):    
             change_x =  1
             change_y = -1 
+
             # Setting the initial velocity of the population
             delta_x = random.randint(-self.people_speed,self.people_speed)
             if delta_x >= 0:
@@ -73,6 +74,7 @@ class MyGame(arcade.Window):
             
             spawn_coord_x = random.randint(10, SCREEN_WIDTH - 10)
             spawn_coord_y = random.randint(10, SCREEN_HEIGHT - 10)
+
             # Making sure the population doesnt spawn within the players circle
             while ((SCREEN_WIDTH/2) -5 < spawn_coord_x < (SCREEN_WIDTH/2) +5) and ((SCREEN_HEIGHT/2) -5<spawn_coord_y< (SCREEN_HEIGHT/2) +5):
                 spawn_coord_x = random.randint(10, SCREEN_WIDTH - 10)
@@ -81,7 +83,6 @@ class MyGame(arcade.Window):
             self.people.append([spawn_coord_x, spawn_coord_y, delta_x, delta_y, change_x, change_y, 0])
         pass
     
-
     def on_draw(self):
         """
         Render the screen.
@@ -102,6 +103,7 @@ class MyGame(arcade.Window):
                 arcade.draw_circle_filled(person[0], person[1], CIRCLE_RADIUS, arcade.color.GREEN)
             else:
                 arcade.draw_circle_filled(person[0], person[1], CIRCLE_RADIUS, arcade.color.BLACK)
+
 
     def on_update(self, delta_time):
         """
@@ -150,28 +152,27 @@ class MyGame(arcade.Window):
             # If a person is within radius of the player the person gets infected
             if (self.player[0] - PEOPLE_RADIUS < person[0] < self.player[0] + PEOPLE_RADIUS) and (self.player[1] - PEOPLE_RADIUS < person[1] < self.player[1] + PEOPLE_RADIUS):
                 person[6] = 1
+        
+        # if there are power ups available spawn them by chance
         if len(self.powerup_list) != 0 :
             drop = random.randint(0,100)
             if drop <= POWERUP_DROP_RATE:
+                # choose a random powerup from the list
                 powerup = random.randint(0,len(self.powerup_list) - 1)
                 self.powerup_list[powerup].center_x = random.randint(10,SCREEN_WIDTH  -10)
                 self.powerup_list[powerup].center_y = random.randint(10,SCREEN_HEIGHT -10)
+                # remove it from the power up list and add it to the powerup draw list
                 self.powerup_draw.append(self.powerup_list.pop(powerup))
-
-        powerup_obtained = arcade.check_for_collision_with_list(self.player_sprite, self.powerup_draw)
-        if len(powerup_obtained) > 0 :
-            p = powerup_obtained[0]
-            if p == self.slowdown_sprite:
-                if self.people_speed < 2:
-                    self.people_speed -= 2
-                    for person in range(0,POPULATION):
-                        person[2] = person[2]/4
-                        person[3] = person[3]/4
-
-            
-            self.powerup_list.append(self.powerup_draw.pop(0))
-
-                
+        
+        if len(arcade.check_for_collision_with_list(self.player_sprite, self.slowdown_sprite)) > 0:
+            if self.people_speed < 2:
+                self.people_speed -= 2
+                """
+                for person in range(0,POPULATION):
+                    person[2] = person[2]/2
+                    person[3] = person[3]/2
+                """
+     
         pass
         
 
@@ -195,20 +196,15 @@ class MyGame(arcade.Window):
         """
         Called whenever the mouse moves.
         """
-        # I dont know why we have to multiply but we do
         self.player[0] = x
-        self.player[1] = y
-        
+        self.player[1] = y  
+
         pass
 
     def on_mouse_press(self, x, y, button, key_modifiers):
         """
         Called when the user presses a mouse button.
         """
-        # Randomly generate the x,y,and z velocities
-       
-
-        # Adding the point to the point list
         
         pass
 
