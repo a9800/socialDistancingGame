@@ -53,9 +53,12 @@ class MyGame(arcade.Window):
         self.player_list = arcade.SpriteList()
         self.powerup_list = arcade.SpriteList()
         self.powerup_draw = arcade.SpriteList()
+        self.slowdownL = arcade.SpriteList()
 
         self.slowdown_sprite = arcade.Sprite(os.getcwd()+"/cold-sprite.png", SPRITE_SCALING_POWERUP)
         self.powerup_list.append(self.slowdown_sprite)
+        self.slowdownL.append(self.slowdown_sprite)
+        
 
         self.player_sprite = arcade.Sprite(os.getcwd()+"/corona-sprite.png", SPRITE_SCALING_PLAYER)
         self.player_list.append(self.player_sprite)
@@ -134,17 +137,17 @@ class MyGame(arcade.Window):
             # Change Velocity of person by chance
             chance = random.randint(0,100)
             if chance <= 10:
-                if person[2] ==  self.people_speed:
-                    person[4] = -1
+                if person[2] ==  self.people_speed and person[4] == 1:
+                    person[4] = person[4] * (-1)
 
-                if person[2] == -self.people_speed:
-                    person[4] =  1
+                if person[2] == -self.people_speed and person[4] == -1:
+                    person[4] = person[4] * (-1)
 
-                if person[3] ==  self.people_speed:
-                    person[5] = -1
+                if person[3] ==  self.people_speed and person[5] == 1:
+                    person[5] = person[5] * (-1)
 
-                if person[3] == -self.people_speed:
-                    person[5] =  1
+                if person[3] == -self.people_speed and person[5] == -1:
+                    person[5] = person[5] * (-1)
 
                 person[2] += person[4]
                 person[3] += person[5]
@@ -164,15 +167,22 @@ class MyGame(arcade.Window):
                 # remove it from the power up list and add it to the powerup draw list
                 self.powerup_draw.append(self.powerup_list.pop(powerup))
         
-        if len(arcade.check_for_collision_with_list(self.player_sprite, self.slowdown_sprite)) > 0:
-            if self.people_speed < 2:
+        if arcade.check_for_collision(self.player_sprite, self.slowdown_sprite):            
+            if self.people_speed > 2:
                 self.people_speed -= 2
-                """
-                for person in range(0,POPULATION):
+
+                for person in self.people:
+                    
+                    # Decrease the x and y velocities
                     person[2] = person[2]/2
                     person[3] = person[3]/2
-                """
-     
+                    
+                    # Decrease the change in x and y velocities
+                    person[4] = person[4]/2
+                    person[5] = person[5]/2
+            
+            
+               
         pass
         
 
