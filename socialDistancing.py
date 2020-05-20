@@ -18,12 +18,14 @@ SCREEN_TITLE = "Social Distancing the Game"
 # Choose the staring population size
 POPULATION = 20
 POPULATION_SPEED = 7
+MIN_POPULATION_SPEED = 2
 BOUNCINESS = 1
 CIRCLE_RADIUS = 8
 PEOPLE_RADIUS = 30
 SPRITE_SCALING_PLAYER = 0.7
 SPRITE_SCALING_POWERUP = 0.5
 POWERUP_DROP_RATE = 0.5
+SLOWDOWN_LENGTH = 100
 
 class MyGame(arcade.Window):
     """
@@ -42,6 +44,8 @@ class MyGame(arcade.Window):
         self.player=[SCREEN_WIDTH/2,SCREEN_HEIGHT/2]
         self.people=[]
         self.people_speed = POPULATION_SPEED
+        self.slowdown_time = 0
+        self.slowdown_effect = False
         # If you have sprite lists, you should create them here,
         # and set them to None
 
@@ -159,6 +163,7 @@ class MyGame(arcade.Window):
         # if there are power ups available spawn them by chance
         if len(self.powerup_list) != 0 :
             drop = random.randint(0,100)
+            
             if drop <= POWERUP_DROP_RATE:
                 # choose a random powerup from the list
                 powerup = random.randint(0,len(self.powerup_list) - 1)
@@ -167,8 +172,14 @@ class MyGame(arcade.Window):
                 # remove it from the power up list and add it to the powerup draw list
                 self.powerup_draw.append(self.powerup_list.pop(powerup))
         
-        if arcade.check_for_collision(self.player_sprite, self.slowdown_sprite):            
-            if self.people_speed > 2:
+        # Check if the player sprite collides with the slowdown sprite 
+        if arcade.check_for_collision(self.player_sprite, self.slowdown_sprite): 
+            
+            # Set the timer for the slowdown effects
+            self.slowdown_time = SLOWDOWN_LENGTH
+            self.slowdown_effect = True
+            if self.people_speed > MIN_POPULATION_SPEED:
+                print("slow").
                 self.people_speed -= 2
 
                 for person in self.people:
@@ -181,8 +192,30 @@ class MyGame(arcade.Window):
                     person[4] = person[4]/2
                     person[5] = person[5]/2
             
+            if len(self.powerup_draw) > 0:
+                self.powerup_list.append(self.powerup_draw.pop(0))
+
+        # If the slowdown time is above zero decrement it
+        if self.slowdown_time >= 1:
+            self.slowdown_time -= 1
+
+        # if the slowdown time is zero and the slowdown effect is true undo the slowdown effect
+        elif self.slowdown_effect == True:
+            self.slowdown_effect = False
+            print("Unslow ppl")
             
-               
+            if self.people_speed < POPULATION_SPEED:
+                self.people_speed += 2
+                for person in self.people:
+                    
+                    # Decrease the x and y velocities
+                    person[2] = person[2]*2
+                    person[3] = person[3]*2
+
+                    # Decrease the change in x and y velocities
+                    person[4] = person[4]*2
+                    person[5] = person[5]*2
+
         pass
         
 
