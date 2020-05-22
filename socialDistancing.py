@@ -16,7 +16,7 @@ SCREEN_HEIGHT = 600
 SCREEN_TITLE = "Social Distancing the Game"
 
 # Choose the staring population size
-POPULATION = 20
+POPULATION = 10
 POPULATION_SPEED = 7
 MIN_POPULATION_SPEED = 2
 BOUNCINESS = 1
@@ -141,16 +141,16 @@ class MyGame(arcade.Window):
             # Change Velocity of person by chance
             chance = random.randint(0,100)
             if chance <= 10:
-                if person[2] ==  self.people_speed and person[4] == 1:
+                if person[2] >=  self.people_speed and person[4] == 1:
                     person[4] = person[4] * (-1)
 
-                if person[2] == -self.people_speed and person[4] == -1:
+                if person[2] <= -self.people_speed and person[4] == -1:
                     person[4] = person[4] * (-1)
 
-                if person[3] ==  self.people_speed and person[5] == 1:
+                if person[3] >=  self.people_speed and person[5] == 1:
                     person[5] = person[5] * (-1)
 
-                if person[3] == -self.people_speed and person[5] == -1:
+                if person[3] <= -self.people_speed and person[5] == -1:
                     person[5] = person[5] * (-1)
 
                 person[2] += person[4]
@@ -178,19 +178,19 @@ class MyGame(arcade.Window):
             # Set the timer for the slowdown effects
             self.slowdown_time = SLOWDOWN_LENGTH
             self.slowdown_effect = True
-            if self.people_speed > MIN_POPULATION_SPEED:
-                print("slow").
-                self.people_speed -= 2
+            if self.people_speed > (POPULATION_SPEED/2):
+                print("slow")
+                self.people_speed = self.people_speed / 4
 
                 for person in self.people:
                     
                     # Decrease the x and y velocities
-                    person[2] = person[2]/2
-                    person[3] = person[3]/2
+                    person[2] = person[2]/4
+                    person[3] = person[3]/4
                     
                     # Decrease the change in x and y velocities
-                    person[4] = person[4]/2
-                    person[5] = person[5]/2
+                    person[4] = person[4]/4
+                    person[5] = person[5]/4
             
             if len(self.powerup_draw) > 0:
                 self.powerup_list.append(self.powerup_draw.pop(0))
@@ -205,16 +205,27 @@ class MyGame(arcade.Window):
             print("Unslow ppl")
             
             if self.people_speed < POPULATION_SPEED:
-                self.people_speed += 2
+                self.people_speed += self.people_speed * 4
                 for person in self.people:
                     
                     # Decrease the x and y velocities
-                    person[2] = person[2]*2
-                    person[3] = person[3]*2
+                    if person[2]*4 > self.people_speed:
+                        person[2] = self.people_speed
+                    elif person[2]*4 < -self.people_speed:
+                        person[2] = -self.people_speed
+                    else:
+                        person[2] = person[2]*4
+                    
+                    if person[3]*4 > self.people_speed:
+                        person[3] = self.people_speed
+                    elif person[3]*4 < -self.people_speed:
+                        person[3] = -self.people_speed
+                    else:
+                        person[3] = person[3]*4
 
                     # Decrease the change in x and y velocities
-                    person[4] = person[4]*2
-                    person[5] = person[5]*2
+                    person[4] = person[4]*4
+                    person[5] = person[5]*4
 
         pass
         
